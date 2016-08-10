@@ -1,0 +1,27 @@
+package imageLib;
+
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+
+public class Test {
+	public static void main(String [] args) throws IOException {
+		File f = new File("/home/v/Project/cam/frame.png");
+		BufferedImage img = ImageIO.read(f);
+		
+		JFrame frame = new JFrame();
+		JPanel panel = new JPanel();
+		frame.add(panel);
+		frame.pack();
+		Graphics gr = panel.getGraphics();
+		gr.drawImage(img, 0, 0, null);
+		gr.dispose();
+		frame.setVisible(true);
+	}
+}

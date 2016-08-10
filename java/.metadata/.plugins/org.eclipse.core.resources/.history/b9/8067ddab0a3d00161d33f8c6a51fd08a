@@ -1,0 +1,21 @@
+package imageLib;
+
+import java.awt.Canvas;
+
+import javax.swing.JFrame;
+
+public class Window {
+	private static JFrame frame = null;
+	
+	public static Canvas getWindow() {
+		if (frame == null) {
+			frame = new JFrame();
+			Canvas canvas = new Canvas();
+			canvas.setSize(640, 480);
+			frame.add(canvas);
+			frame.pack();
+			frame.setVisible(true);
+		}
+		return frame;
+	}
+}

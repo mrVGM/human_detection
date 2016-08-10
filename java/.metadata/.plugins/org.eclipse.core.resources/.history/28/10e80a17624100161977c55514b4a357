@@ -1,0 +1,45 @@
+package imageLib;
+
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+
+
+public class Test {
+	public static void main(String [] args) throws IOException, InterruptedException {
+		File f = new File("/home/v/Project/cam/frame.png");
+		BufferedImage img = ImageIO.read(f);
+		f = new File("/home/v/Project/cam/frame (copy).png");
+		BufferedImage img2 = ImageIO.read(f);
+		
+		Window.frame = new JFrame();
+		Window.frame.setVisible(true);
+		
+		Window.currentImage = new JLabel(new ImageIcon(img));
+		
+		frame.add(Window.currentImage);
+		frame.pack();
+		
+		System.out.println("der");
+		Thread.sleep(5000);
+		
+		frame.remove(picLabel);
+		
+		frame.revalidate();
+		
+		picLabel = new JLabel(new ImageIcon(img2));
+		
+		frame.add(picLabel);
+		
+		frame.revalidate();
+		
+		System.out.println("der3");
+	}
+}

@@ -1,0 +1,7 @@
+package imageLib;
+
+import javax.swing.JFrame;
+
+public class Window {
+	public static JFrame frame;
+}

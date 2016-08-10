@@ -1,0 +1,18 @@
+package imageLib;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class Test {
+	public static void main(String [] args) throws IOException {
+		BufferedImage img = ImageIO.read(new File("/home/v/Desktop/PETAdataset/CUHK/archive/0002.png"));
+		Image im = new Image(img).toBW();
+		
+		Cell[][] matr = im.toCellMatrix();
+		
+		System.out.println(matr[0][0].cellHistogram());
+	}
+}

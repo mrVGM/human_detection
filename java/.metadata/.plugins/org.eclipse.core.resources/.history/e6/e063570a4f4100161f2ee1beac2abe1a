@@ -1,0 +1,208 @@
+package imageLib;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import javax.swing.JFrame;
+import java.awt.Canvas;
+
+class Block {
+	
+	public static List<Double> normalize(List<Double> l) {
+		double n = 0;
+		Iterator<Double> it = l.iterator();
+		while (it.hasNext()) {
+			double cur = it.next();
+			n = n + cur * cur;
+		}
+		n = Math.sqrt(n);
+		if (n > 0) {
+			LinkedList<Double> tmp = new LinkedList<>();
+			it = l.iterator();
+			while (it.hasNext()) {
+				tmp.add(it.next() / n);
+			}
+			return tmp;
+		}
+		return l;
+	}
+	
+	public Cell[][] matrix;
+	public int r;
+	public int c;
+	
+	public Block(Cell[][] matrix, int r, int c) {
+		this.matrix = matrix;
+		this.r = r;
+		this.c = c;
+	}
+	
+	public List<Double> blockHist() {
+		List<Double> tmp = matrix[r][c].cellHistogram();
+		tmp.addAll(matrix[r][c+1].cellHistogram());
+		tmp.addAll(matrix[r+1][c].cellHistogram());
+		tmp.addAll(matrix[r+1][c+1].cellHistogram());
+		
+		return normalize(tmp);
+	}
+	
+}
+
+public class Image {
+	public BufferedImage img;
+	public Image(BufferedImage x) {
+		img = x;
+	}
+	
+	public void display() {
+		//canvas.getGraphics().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+		//Window.getCanvas().getGraphics().drawImage(img, 0, 0, null);
+		
+		if (Window.canvas == null) {
+			JFrame frame = new JFrame();
+			frame = new JFrame();
+			Window.canvas = new Canvas();
+			Window.canvas.setSize(img.getWidth(), img.getHeight());
+			Graphics graphics = Window.canvas.getGraphics();
+			graphics.drawImage(img, 0, 0, null);
+			graphics.dispose();
+			frame.add(Window.canvas);
+			frame.pack();
+			frame.setVisible(true);
+			return;
+		}
+		Graphics graphics = Window.canvas.getGraphics();
+		graphics.drawImage(img, 0, 0, null);
+		graphics.dispose();
+	}
+	
+	public Image toBW() {
+		BufferedImage res = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+		for (int i = 0; i < img.getWidth(); i++) {
+			for (int j = 0; j < img.getHeight(); j++) {
+				Color pixel = new Color(img.getRGB(i, j));
+				double tmp = .2126 * Math.pow((pixel.getRed() / 255.0), 2.2) +
+								   .7152 * Math.pow((pixel.getGreen() / 255.0), 2.2) +
+								   .0722 * Math.pow((pixel.getBlue() / 255.0), 2.2);
+				float intensity = (float) tmp;
+				Color c = new Color(intensity, intensity, intensity);
+				res.setRGB(i, j, c.getRGB());
+			}
+		}
+		return new Image(res);
+	}
+	
+	public int getIntensity(int x, int y) {
+		Color c = new Color(img.getRGB(x, y));
+		return c.getRed();
+	}
+	
+	Cell[][] toCellMatrix() {
+		Cell [][] matr = new Cell[img.getHeight() / Cell.dim] [];
+		for (int i = 0; i < matr.length; i++) {
+			matr[i] = new Cell[img.getWidth() / Cell.dim];
+			for (int j = 0; j < matr[i].length; j++) {
+				matr[i][j] = new Cell(j * Cell.dim, i * Cell.dim, this);
+			}
+		}
+		return matr;
+	}
+	
+	Block[][] toBlockMatrix() {
+		Cell[][] cm = toCellMatrix();
+		Block[][] res = new Block[cm.length - 1][];
+		for (int i = 0; i < res.length; i++) {
+			res[i] = new Block[cm[i].length - 1];
+			for (int j = 0; j < res[i].length; j++) {
+				res[i][j] = new Block(cm, i, j);
+			}
+		}
+		return res;
+	}
+	public List<Double> histogram() {
+		List<Double> res = new LinkedList<>();
+		Block[][] bm = toBlockMatrix();
+		for (int i = 0; i < bm.length; i++) {
+			for (int j = 0; j < bm[i].length; j++) {
+				res.addAll(bm[i][j].blockHist());
+			}
+		}
+		
+		res = Block.normalize(res);
+		
+		double threshold = 0.2;
+		
+		Iterator<Double> it = res.iterator();
+		List<Double> tmp = new LinkedList<>();
+		while (it.hasNext()) {
+			tmp.add(Math.min(it.next(), threshold));
+		}
+		res = tmp;
+		
+		return Block.normalize(res);
+	}
+	
+	public Image scale(int width, int height) {
+		java.awt.Image tmp = img.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
+		BufferedImage dimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		
+		Graphics2D g2d = dimg.createGraphics();
+	    g2d.drawImage(tmp, 0, 0, null);
+	    g2d.dispose();
+	    
+		return new Image(dimg);
+		
+	}
+	public Image subImage(int x, int y, int width, int height) {
+		return new Image(img.getSubimage(x, y, width, height));
+	}
+	
+	public void mark(int x, int y, int width, int height) {
+		Graphics2D graphics = img.createGraphics();
+		graphics.setColor(Color.YELLOW);
+		graphics.drawRect(x, y, width, height);
+		graphics.dispose();
+	}
+	
+	public void store(String filename) {
+		try {
+			ImageIO.write(img, "png", new File(filename));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public Image colorNormalized() {
+		BufferedImage norm = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+		for (int i = 0; i < img.getWidth(); i++) {
+			for (int j = 0; j < img.getHeight(); j++) {
+				Color cur = new Color(img.getRGB(i, j));
+				double r = cur.getRed() / 255.0;
+				double g = cur.getGreen() / 255.0;
+				double b = cur.getBlue() / 255.0;
+				
+				double n = r*r + g*g + b*b;
+				n = Math.sqrt(n);
+				
+				if (n > 0) {
+					Color tmp = new Color((float) (r / n), (float) (g / n), (float) (b / n));
+					norm.setRGB(i, j, tmp.getRGB());
+				}
+				else {
+					norm.setRGB(i, j, cur.getRGB());
+				}
+			}
+		}
+		return new Image(norm);
+	}
+}

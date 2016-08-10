@@ -1,0 +1,11 @@
+package imageLib;
+
+import javax.swing.JFrame;
+
+public class Window {
+	private static JFrame frame = nu;
+	
+	public static JFrame getWindow() {
+		if (fr)
+	}
+}

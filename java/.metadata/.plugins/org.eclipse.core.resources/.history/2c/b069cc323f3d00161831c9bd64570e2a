@@ -1,0 +1,12 @@
+package imageLib;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
+public class Test {
+	public static void main(String [] args) {
+		BufferedImage img = ImageIO.read(new File("/home/v/Desktop/PETAdataset/CUHK/archive/0002.png"));
+	}
+}

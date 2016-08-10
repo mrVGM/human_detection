@@ -1,0 +1,7 @@
+package imageLib;
+
+public class Test {
+	void func() {
+		
+	}
+}

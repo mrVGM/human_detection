@@ -1,0 +1,13 @@
+d=$(curl -X GET http://video4.earthcam.com:1935/fecnetwork/AbbeyRoadHD1.flv/playlist.m3u8 2> /dev/null)
+
+while read -ra ADDR; do
+  for i in "${ADDR[@]}"; do
+    link=$i
+  done
+done <<< "$d"
+
+echo $link
+
+ffmpeg-3.0.2-64bit-static/ffmpeg -y -i $link -vf fps=1 -update 1 cam/frame.png
+
+

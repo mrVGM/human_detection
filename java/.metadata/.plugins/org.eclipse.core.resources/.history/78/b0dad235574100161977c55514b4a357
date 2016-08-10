@@ -1,0 +1,14 @@
+package imageLib;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
+
+public class Test {
+	public static void main(String [] args) {
+		File f = new File("/home/v/Project/cam/frame.png");
+		BufferedImage img = ImageIO.read(f);
+	}
+}
